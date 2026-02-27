@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+*.png
+*.html
+plotly_mcp_output/
+.pytest_cache/
