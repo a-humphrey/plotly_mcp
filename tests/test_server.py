@@ -300,11 +300,14 @@ class TestCreateLiveDashboard:
         assert info["panel_count"] >= 1
         assert info["filter_count"] >= 0
         assert info["theme"] == "light"
-        assert info["server"] is None
+        # serve defaults to True now
+        assert info["server"] is not None
+        from plotly_mcp.dashboard_server import stop_server
+        stop_server()
 
     def test_dark_theme(self, output_dir, sample_csv):
         result = create_live_dashboard(
-            file_path=sample_csv, theme="dark", filename="dark_dash"
+            file_path=sample_csv, theme="dark", filename="dark_dash", serve=False
         )
         info = json.loads(result)
         assert info["success"] is True
@@ -312,7 +315,7 @@ class TestCreateLiveDashboard:
 
     def test_with_metrics_hints(self, output_dir, sample_csv):
         result = create_live_dashboard(
-            file_path=sample_csv, metrics=["revenue"], filename="kpi_test"
+            file_path=sample_csv, metrics=["revenue"], filename="kpi_test", serve=False
         )
         info = json.loads(result)
         assert info["success"] is True

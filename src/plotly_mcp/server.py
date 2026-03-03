@@ -389,7 +389,7 @@ def create_live_dashboard(
     category_column: str | None = None,
     theme: str = "light",
     refresh_interval: int | None = None,
-    serve: bool = False,
+    serve: bool = True,
     port: int = 8050,
     filename: str | None = None,
 ) -> str:
@@ -408,7 +408,7 @@ def create_live_dashboard(
         theme: Color theme — "light" or "dark".
         refresh_interval: Seconds between data polls (None = no refresh).
                           Requires serve=True to work.
-        serve: Start a local HTTP server for live data refresh.
+        serve: Start a local HTTP server for live data refresh (default True).
         port: Server port (default 8050). Auto-increments if in use.
         filename: Output filename (auto-generated if omitted).
     """
