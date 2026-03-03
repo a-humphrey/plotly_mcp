@@ -1,0 +1,36 @@
+employee_id,department,role,salary,years_experience,satisfaction_score,performance_rating,status
+E001,Engineering,Senior Engineer,145000,12,4.2,Exceeds,Active
+E002,Engineering,Staff Engineer,175000,15,4.5,Exceeds,Active
+E003,Engineering,Junior Engineer,85000,2,3.8,Meets,Active
+E004,Engineering,Senior Engineer,140000,10,4.0,Meets,Active
+E005,Engineering,Engineering Manager,165000,14,4.3,Exceeds,Active
+E006,Engineering,Junior Engineer,82000,1,3.5,Meets,Active
+E007,Engineering,Senior Engineer,150000,11,4.1,Exceeds,Active
+E008,Engineering,Junior Engineer,88000,3,4.0,Meets,Active
+E009,Sales,Account Executive,95000,5,3.9,Meets,Active
+E010,Sales,Senior AE,120000,8,4.4,Exceeds,Active
+E011,Sales,Sales Manager,140000,12,4.1,Meets,Active
+E012,Sales,Account Executive,92000,4,3.6,Meets,Active
+E013,Sales,SDR,65000,1,3.3,Below,Active
+E014,Sales,Senior AE,125000,9,4.2,Exceeds,Active
+E015,Sales,Account Executive,98000,6,3.8,Meets,Active
+E016,Marketing,Content Lead,105000,7,4.0,Meets,Active
+E017,Marketing,Marketing Manager,130000,10,4.3,Exceeds,Active
+E018,Marketing,Designer,90000,4,3.9,Meets,Active
+E019,Marketing,SEO Specialist,85000,3,3.7,Meets,Active
+E020,Marketing,Content Writer,72000,2,3.5,Meets,Active
+E021,Product,Product Manager,135000,8,4.4,Exceeds,Active
+E022,Product,Senior PM,155000,12,4.6,Exceeds,Active
+E023,Product,Associate PM,95000,3,3.8,Meets,Active
+E024,Product,UX Researcher,100000,5,4.0,Meets,Active
+E025,Finance,Controller,140000,14,4.2,Exceeds,Active
+E026,Finance,Financial Analyst,90000,4,3.9,Meets,Active
+E027,Finance,Senior Analyst,110000,7,4.1,Meets,Active
+E028,Finance,AP Specialist,68000,2,3.4,Meets,Active
+E029,HR,HR Manager,120000,9,4.0,Meets,Active
+E030,HR,Recruiter,75000,3,3.6,Meets,Active
+E031,HR,HR Business Partner,105000,6,4.1,Meets,Active
+E032,Support,Support Lead,95000,7,4.0,Meets,Active
+E033,Support,Support Agent,58000,1,3.2,Below,Active
+E034,Support,Support Agent,62000,2,3.5,Meets,Active
+E035,Support,Senior Agent,78000,5,3.9,Meets,Active

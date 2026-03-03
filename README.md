@@ -8,6 +8,7 @@ An MCP (Model Context Protocol) server that enables LLMs to generate Plotly char
 - **Full property pass-through** — any valid Plotly trace or layout property is accepted directly
 - **Multi-trace charts** — overlay multiple trace types on a single figure
 - **Dashboard layouts** — multi-panel grids with presets (`2x2`, `sidebar`, etc.) and auto subplot type detection
+- **Live dashboards** — auto-generated interactive HTML dashboards with KPI cards, filters, cross-filtering, light/dark themes, and optional live data refresh
 - **File-based workflows** — load CSV/TSV/Excel/JSON, analyze data, and chart in one step
 - **Structured error handling** — errors return JSON with type, message, and suggestions the LLM can act on
 - **Dual output** — HTML (interactive) and/or PNG (static) output
@@ -30,6 +31,7 @@ Environment variables (all optional):
 | `PLOTLY_MCP_DEFAULT_FORMAT` | `html` | Default output format (`html`, `png`, or `both`) |
 | `PLOTLY_MCP_DEFAULT_WIDTH` | `800` | Default image width in px |
 | `PLOTLY_MCP_DEFAULT_HEIGHT` | `600` | Default image height in px |
+| `PLOTLY_MCP_DEFAULT_REFRESH_INTERVAL` | *(none)* | Default live dashboard refresh interval in seconds |
 
 ## MCP Client Setup
 
@@ -128,6 +130,52 @@ Load a data file and create a chart in one step:
   "group_column": "region",
   "trace_properties": {"marker_color": "steelblue"},
   "output_format": "html"
+}
+```
+
+### `create_live_dashboard`
+
+Auto-generate an interactive HTML dashboard from a data file. Analyzes the data to produce KPI cards, charts, filters, cross-filtering, and a theme toggle — all in a single self-contained HTML file.
+
+```json
+{
+  "file_path": "/path/to/sales.csv",
+  "title": "Sales Dashboard",
+  "metrics": ["revenue", "profit"],
+  "time_column": "date",
+  "category_column": "region",
+  "theme": "dark"
+}
+```
+
+**With live data refresh** — starts a local HTTP server that re-reads the source file on each poll:
+
+```json
+{
+  "file_path": "/path/to/sales.csv",
+  "title": "Live Sales",
+  "serve": true,
+  "refresh_interval": 5,
+  "port": 8050
+}
+```
+
+Features:
+- **KPI cards** — auto-detected or specified numeric metrics displayed as summary cards
+- **Auto-layout** — time series, bar charts, pie charts, histograms, and data tables chosen based on column types
+- **Dropdown filters** — one per categorical column (up to 20 unique values)
+- **Date range filters** — for datetime columns
+- **Cross-filtering** — click a bar or pie slice to filter all other charts
+- **Theme toggle** — switch between light and dark themes at runtime
+- **Live refresh** — optional polling via a local HTTP server (`serve: true`)
+
+### `stop_dashboard_server`
+
+Stop a running live dashboard server:
+
+```json
+{
+  "port": 8050
 }
 ```
 

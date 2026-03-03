@@ -20,8 +20,10 @@ from .charts import (
     build_dashboard,
     save_chart,
 )
-from .config import get_default_format
+from .config import get_default_format, get_default_refresh_interval
+from .dashboard_server import start_server, stop_server
 from .data_utils import load_dataframe, summarize_dataframe
+from .live_dashboard import build_live_dashboard, save_live_dashboard
 
 # Log to stderr — required for stdio transport
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -372,6 +374,128 @@ def create_dashboard(
             "success": False,
             "error": {"type": "unexpected_error", "message": str(e)[:500]},
         })]
+
+
+# ---------------------------------------------------------------------------
+# Tool 5: create_live_dashboard
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def create_live_dashboard(
+    file_path: str,
+    title: str = "Dashboard",
+    metrics: list[str] | None = None,
+    time_column: str | None = None,
+    category_column: str | None = None,
+    theme: str = "light",
+    refresh_interval: int | None = None,
+    serve: bool = False,
+    port: int = 8050,
+    filename: str | None = None,
+) -> str:
+    """Create an interactive HTML dashboard from a data file.
+
+    Auto-analyzes the data to generate KPI cards, charts, filters,
+    cross-filtering, and theme toggle. Works standalone as a single
+    HTML file, or with a live data server for auto-refresh.
+
+    Args:
+        file_path: Absolute path to the data file (CSV/TSV/Excel/JSON).
+        title: Dashboard title displayed in the header.
+        metrics: Column names for KPI cards (auto-detected if None).
+        time_column: Column for time axis (auto-detected if None).
+        category_column: Column for filters (auto-detected if None).
+        theme: Color theme — "light" or "dark".
+        refresh_interval: Seconds between data polls (None = no refresh).
+                          Requires serve=True to work.
+        serve: Start a local HTTP server for live data refresh.
+        port: Server port (default 8050). Auto-increments if in use.
+        filename: Output filename (auto-generated if omitted).
+    """
+    logger.info("create_live_dashboard: %s serve=%s", file_path, serve)
+
+    # Use default refresh interval from config if not specified
+    if refresh_interval is None:
+        refresh_interval = get_default_refresh_interval()
+
+    # Only enable refresh if serve=True
+    effective_refresh = refresh_interval if serve else None
+
+    try:
+        html, config = build_live_dashboard(
+            data_source=file_path,
+            title=title,
+            metrics=metrics,
+            time_column=time_column,
+            category_column=category_column,
+            theme=theme,
+            refresh_interval=effective_refresh,
+        )
+
+        path = save_live_dashboard(html, filename=filename)
+
+        result: dict[str, Any] = {
+            "success": True,
+            "files": [path],
+            "panel_count": len(config.panels),
+            "filter_count": len(config.filters),
+            "kpi_count": len(config.kpis),
+            "theme": theme,
+            "server": None,
+        }
+
+        if serve:
+            server_info = start_server(html, file_path, port=port)
+            result["server"] = server_info
+            if effective_refresh:
+                result["refresh_interval"] = effective_refresh
+
+        return json.dumps(result, indent=2)
+
+    except FileNotFoundError as e:
+        return json.dumps({
+            "success": False,
+            "error": {"type": "file_error", "message": str(e)},
+        })
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": {"type": "unexpected_error", "message": str(e)[:500]},
+        })
+
+
+# ---------------------------------------------------------------------------
+# Tool 6: stop_dashboard_server
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def stop_dashboard_server(port: int = 8050) -> str:
+    """Stop a running live dashboard server.
+
+    Args:
+        port: Port of the server to stop (default 8050).
+    """
+    logger.info("stop_dashboard_server: port=%d", port)
+    try:
+        stopped = stop_server(port=port)
+        if stopped:
+            return json.dumps({
+                "success": True,
+                "message": f"Server on port {port} stopped.",
+            })
+        else:
+            return json.dumps({
+                "success": False,
+                "error": {
+                    "type": "validation_error",
+                    "message": f"No active server found on port {port}.",
+                },
+            })
+    except Exception as e:
+        return json.dumps({
+            "success": False,
+            "error": {"type": "unexpected_error", "message": str(e)[:500]},
+        })
 
 
 # ---------------------------------------------------------------------------

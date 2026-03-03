@@ -21,3 +21,11 @@ def get_default_width() -> int:
 
 def get_default_height() -> int:
     return int(os.environ.get("PLOTLY_MCP_DEFAULT_HEIGHT", "600"))
+
+
+def get_default_refresh_interval() -> int | None:
+    """Return the default refresh interval in seconds, or None if not set."""
+    val = os.environ.get("PLOTLY_MCP_DEFAULT_REFRESH_INTERVAL")
+    if val is None:
+        return None
+    return int(val)

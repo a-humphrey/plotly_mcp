@@ -10,6 +10,8 @@ from plotly_mcp.server import (
     create_chart,
     create_chart_from_file,
     create_dashboard,
+    create_live_dashboard,
+    stop_dashboard_server,
 )
 
 
@@ -282,3 +284,90 @@ class TestCreateDashboard:
         )
         info = _parse_result(result)
         assert info["success"] is True
+
+
+# ---------------------------------------------------------------------------
+# create_live_dashboard
+# ---------------------------------------------------------------------------
+
+class TestCreateLiveDashboard:
+    def test_basic_dashboard(self, output_dir, sample_csv):
+        result = create_live_dashboard(file_path=sample_csv, filename="live_test")
+        info = json.loads(result)
+        assert info["success"] is True
+        assert len(info["files"]) == 1
+        assert info["files"][0].endswith("live_test.html")
+        assert info["panel_count"] >= 1
+        assert info["filter_count"] >= 0
+        assert info["theme"] == "light"
+        assert info["server"] is None
+
+    def test_dark_theme(self, output_dir, sample_csv):
+        result = create_live_dashboard(
+            file_path=sample_csv, theme="dark", filename="dark_dash"
+        )
+        info = json.loads(result)
+        assert info["success"] is True
+        assert info["theme"] == "dark"
+
+    def test_with_metrics_hints(self, output_dir, sample_csv):
+        result = create_live_dashboard(
+            file_path=sample_csv, metrics=["revenue"], filename="kpi_test"
+        )
+        info = json.loads(result)
+        assert info["success"] is True
+        assert info["kpi_count"] >= 1
+
+    def test_file_not_found_error(self, output_dir):
+        result = create_live_dashboard(file_path="/nonexistent/file.csv")
+        info = json.loads(result)
+        assert info["success"] is False
+        assert info["error"]["type"] == "file_error"
+
+    def test_with_serve(self, output_dir, sample_csv):
+        result = create_live_dashboard(
+            file_path=sample_csv, serve=True, port=9500, filename="served_dash"
+        )
+        info = json.loads(result)
+        assert info["success"] is True
+        assert info["server"] is not None
+        assert info["server"]["port"] >= 9500
+        # Clean up
+        from plotly_mcp.dashboard_server import stop_server
+        stop_server()
+
+    def test_refresh_only_with_serve(self, output_dir, sample_csv):
+        # refresh_interval without serve should not include refresh indicator
+        result = create_live_dashboard(
+            file_path=sample_csv,
+            refresh_interval=10,
+            serve=False,
+            filename="no_serve_refresh",
+        )
+        info = json.loads(result)
+        assert info["success"] is True
+        assert info["server"] is None
+        assert "refresh_interval" not in info
+
+
+# ---------------------------------------------------------------------------
+# stop_dashboard_server
+# ---------------------------------------------------------------------------
+
+class TestStopDashboardServer:
+    def test_stop_when_not_running(self):
+        result = stop_dashboard_server(port=9999)
+        info = json.loads(result)
+        assert info["success"] is False
+        assert "No active server" in info["error"]["message"]
+
+    def test_stop_running_server(self, output_dir, sample_csv):
+        # Start a server first
+        create_live_dashboard(
+            file_path=sample_csv, serve=True, port=9510, filename="stop_test"
+        )
+        # Stop it
+        result = stop_dashboard_server(port=9510)
+        info = json.loads(result)
+        assert info["success"] is True
+        assert "stopped" in info["message"]
